@@ -31,9 +31,9 @@ end
 
 def sort_correction(pages)
   until valid_correction(pages)
-    pages.each_with_index do |page, index| 
+    pages.each_with_index do |page, index|
       next if index + 1 >= pages.length
-      if (@after_rules[page] || []).include? pages[index + 1] 
+      if (@after_rules[page] || []).include? pages[index + 1]
         pages[index], pages[index+1] = pages[index+1], pages[index]
       end
     end
@@ -41,11 +41,8 @@ def sort_correction(pages)
   pages
 end
 
-res = corrections.filter {|corr| valid_correction(corr) }.reduce(0) { |sum, corr| sum += corr[corr.length/2].to_i } 
+res = corrections.filter {|corr| valid_correction(corr) }.reduce(0) { |sum, corr| sum += corr[corr.length/2].to_i }
 puts "Sum of valid middle pages is #{res}"
 
-invalid_corrections = corrections.filter {|corr| !valid_correction(corr)}
-res = invalid_corrections.map do |corr|
-  sorted = sort_correction(corr)
-end.reduce(0) { |sum, corr| sum += corr[corr.length/2].to_i }
+res = corrections.filter { !valid_correction(_1) }.map { sort_correction(_1) }.reduce(0) { |s, c| s += c[c.length / 2].to_i }
 puts "Sum of corrected middle pages is #{res}"
