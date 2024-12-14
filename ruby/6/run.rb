@@ -3,19 +3,15 @@ if ARGV.length < 1
   return
 end
 file_name = ARGV[0]
-initial_map = File.readlines(file_name, chomp:true).map { _1.split('') }
-
-# pp initial_map
-
-@current_map = []
-initial_map.each { @current_map << _1 }
-
-# puts @current_map
+@initial_map = File.readlines(file_name, chomp:true).map { _1.split('') }
 
 Coordinate = Data.define(:x, :y)
 Guard = Data.define(:coord, :direction)
 
-@visited = Set.new()
+def initialize_current_map
+  @current_map = []
+  @initial_map.each { @current_map << _1.dup }
+end
 
 def guards 
   ['^', '>', 'v', '<']
@@ -31,7 +27,6 @@ end
 
 def move_guard(guard)
   old_coord = guard.coord
-  @visited.add(old_coord)
   old_direction = guard.direction
   @current_map[old_coord.y][old_coord.x] = '.'
   case guard.direction
@@ -74,14 +69,42 @@ def find_guard(map)
   end
 end
 
-guard = find_guard(initial_map)
-until guard.nil?
-  # draw_map
-  # sleep(0.1)
-  print '.'
-  guard = move_guard(guard)
+def part_1(start_map)
+  initialize_current_map()
+  visited = Set.new()
+  guard = find_guard(start_map)
+  until guard.nil?
+    visited.add(guard.coord)
+    print '.'
+    guard = move_guard(guard)
+  end
+  puts ''
+  puts "Guard is out"
+  puts "The guard visited #{visited.length} locations"
+  visited
 end
-# draw_map
-puts "Guard is out"
-pp @visited
-pp @visited.length
+
+def part_2(start_map, original_visited)
+  guard = find_guard(start_map)
+  original_visited.delete(guard.coord)
+  res = original_visited.map do |obstacle|
+    print '.'
+    initialize_current_map()
+    @current_map[obstacle.y][obstacle.x] = '#'
+    guard = find_guard(start_map)
+    visited = Set.new()
+    loop_detected = false
+    until guard.nil? || loop_detected
+      loop_detected = visited.include? guard
+      visited.add(guard)
+      guard = move_guard(guard)
+    end
+    loop_detected || nil
+  end.compact.count
+  puts ''
+  puts "Found #{res} different loop positions"
+end
+
+guard_original_nodes = part_1(@initial_map)
+
+part_2(@initial_map, guard_original_nodes)
