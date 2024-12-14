@@ -45,11 +45,9 @@ def move_guard(guard)
     new_direction = directions[(directions.index(old_direction) + 1) % directions.length]
     new_guard = Guard.new(old_coord, new_direction)
   else
-    old_direction
     new_guard = Guard.new(new_point, old_direction)
   end
 
-  
   @current_map[new_guard.coord.y][new_guard.coord.x] = guards[directions.index(new_guard.direction)]
   new_guard
 end
